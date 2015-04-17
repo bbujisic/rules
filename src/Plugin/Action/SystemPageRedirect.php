@@ -61,10 +61,9 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
   protected $logger;
 
   /**
-   * The url generator service.
-   *
-   * @var \Drupal\Core\Routing\UrlGeneratorInterface
+   * @var \Drupal\Core\Routing\RedirectDestinationInterface
    */
+  protected $redirectDestination;
 
   /**
    * Constructs a PageRedirect object.
@@ -78,9 +77,10 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
    * @param \Psr\Log\LoggerInterface $logger
    *   The alias storage service..
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerInterface $logger) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerInterface $logger, RedirectDestinationInterface $redirect_destination) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->logger = $logger;
+    $this->redirectDestination = $redirect_destination;
   }
 
   /**
@@ -91,7 +91,8 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('logger.factory')
+      $container->get('logger.factory'),
+      $container->get('redirect.destination')
     );
   }
 
@@ -124,13 +125,13 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
     // @todo: This might not work. Test!
     if ($keepDestination) {
       $url .= strpos($url, '?') === FALSE ? '?' : '&';
-      $url .= \Drupal::destination()->get();
+      $url .= $this->redirectDestination->get();
     }
 
     // If force is enabled, remove any destination parameter.
     // @todo: This might not work. Test!
     if ($force) {
-      \Drupal::destination()->set(null);
+      $this->redirectDestination->set(null);
     }
 
     $this->setProvidedValue('redirect', new RedirectResponse($url));
