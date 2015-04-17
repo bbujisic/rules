@@ -9,6 +9,7 @@ namespace Drupal\rules\Plugin\Action;
 
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\rules\Core\RulesActionBase;
+use Drupal\Core\Routing\RedirectDestinationInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\DependencyInjection\ContainerInterface;
