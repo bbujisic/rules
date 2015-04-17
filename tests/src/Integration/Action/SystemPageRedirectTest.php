@@ -8,9 +8,6 @@
 namespace Drupal\Tests\rules\Integration\Action;
 
 use Drupal\Tests\rules\Integration\RulesIntegrationTestBase;
-use Drupal\Core\Language\LanguageInterface;
-use Psr\Log\LogLevel;
-use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * @coversDefaultClass \Drupal\rules\Plugin\Action\SystemPageRedirect
@@ -26,6 +23,10 @@ class SystemPageRedirectTest extends RulesIntegrationTestBase {
    * @var \Psr\Log\LoggerInterface
    */
   protected $logger;
+
+  /**
+   * @var \Drupal\Core\Routing\RedirectDestinationInterface
+   */
   protected $redirectDestination;
 
   /**
@@ -34,27 +35,6 @@ class SystemPageRedirectTest extends RulesIntegrationTestBase {
    * @var \Drupal\rules\Plugin\Action\SystemPageRedirect
    */
   protected $action;
-
-//  private function deleteMe() {
-//    // Test the page redirect.
-//    $node = $this->drupalCreateNode();
-//    $rule = rules_reaction_rule();
-//    $rule->event('node_view')
-//      ->action('redirect', array('url' => 'user'));
-//    $rule->save('test2');
-//
-//    $this->drupalGet('node/' . $node->nid);
-//    $this->assertEqual($this->getUrl(), url('user', array('absolute' => TRUE)), 'Redirect has been issued.');
-//
-//    // Also test using a url including a fragment.
-//    $actions = $rule->actions();
-//    $actions[0]->settings['url'] = 'user#fragment';
-//    $rule->save();
-//
-//    $this->drupalGet('node/' . $node->nid);
-//    $this->assertEqual($this->getUrl(), url('user', array('absolute' => TRUE, 'fragment' => 'fragment')), 'Redirect has been issued.');
-//  }
-
 
   /**
    * {@inheritdoc}
@@ -95,11 +75,11 @@ class SystemPageRedirectTest extends RulesIntegrationTestBase {
     $this->action->execute();
 
     /* @var \Symfony\Component\HttpFoundation\RedirectResponse $redirect */
-    $redirect = $this->action->getProvidedContext('redirect')->getContextValue();
+    $redirect = $this->action->getProvidedContext('redirect')
+      ->getContextValue();
 
     $this->assertInstanceOf('Symfony\Component\HttpFoundation\RedirectResponse', $redirect);
 
     $this->assertEquals($redirect->getTargetUrl(), 'user');
-
   }
 }

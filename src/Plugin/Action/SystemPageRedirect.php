@@ -76,9 +76,7 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Psr\Log\LoggerInterface $logger
-   *   The alias storage service.
-   * @param \Psr\Log\LoggerInterface $logger
-   *   The alias storage service.
+   *   The alias storage service..
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerInterface $logger) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -135,7 +133,6 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
     }
 
     $this->setProvidedValue('redirect', new RedirectResponse($url));
-
   }
 
 }
