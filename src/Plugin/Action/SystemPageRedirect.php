@@ -116,6 +116,7 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
     $batch = batch_get();
     if (isset($batch['current_set'])) {
       $this->logger->log(LogLevel::WARNING, $this->t('Skipped page redirect during batch processing'));
+      $this->setProvidedValue('redirect', false);
       return;
     }
 
