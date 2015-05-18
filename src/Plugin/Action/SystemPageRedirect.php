@@ -45,11 +45,11 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  *
  * @todo: Check if we can use context.url.type = "uri".
  * @todo: Check if we can use context.force.restriction = "input".
- * @todo: Check of we can use context.force.optional = true.
- * @todo: Check of we can use context.force.defaultValue = true.
+ * @todo: Check if we can use context.force.optional = TRUE.
+ * @todo: Check if we can use context.force.defaultValue = TRUE.
  * @todo: Check if we can use context.destination.restriction = "input".
- * @todo: Check of we can use context.destination.optional = true.
- * @todo: Check of we can use context.destination.defaultValue = true.
+ * @todo: Check if we can use context.destination.optional = TRUE.
+ * @todo: Check if we can use context.destination.defaultValue = TRUE.
  *
  */
 class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPluginInterface {
@@ -118,7 +118,7 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
     $batch = batch_get();
     if (isset($batch['current_set'])) {
       $this->logger->log(LogLevel::WARNING, $this->t('Skipped page redirect during batch processing'));
-      $this->setProvidedValue('redirect', false);
+      $this->setProvidedValue('redirect', FALSE);
       return;
     }
 
@@ -132,7 +132,7 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
     // If force is enabled, remove any destination parameter.
     // @todo: This might not work. Test!
     if ($force) {
-      $this->redirectDestination->set(null);
+      $this->redirectDestination->set(NULL);
     }
 
     $this->setProvidedValue('redirect', new RedirectResponse($url));
