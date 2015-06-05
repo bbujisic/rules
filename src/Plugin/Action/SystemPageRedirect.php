@@ -23,17 +23,19 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  *   label = @Translation("Page redirect"),
  *   category = @Translation("System"),
  *   context = {
- *     "url" = @ContextDefinition("uri",
+ *     "url" = @ContextDefinition("string",
  *       label = @Translation("URL"),
  *       description = @Translation("A Drupal path, path alias, or external URL to redirect to. Enter (optional) queries after ? and (optional) anchor after #."),
  *     ),
  *     "force" = @ContextDefinition("boolean",
  *       label = @Translation("Force redirect"),
  *       description = @Translation("Force the redirect even if another destination parameter is present. Per default Drupal would redirect to the path given as destination parameter, in case it is set. Usually the destination parameter is set by appending it to the URL."),
+ *       required = FALSE,
  *     ),
  *     "destination" = @ContextDefinition("boolean",
  *       label = @Translation("Append destination parameter"),
  *       description = @Translation("Whether to append a destination parameter to the URL, so another redirect issued later on would lead back to the origin page."),
+ *       required = FALSE,
  *     ),
  *   },
  *   provides = {
@@ -43,12 +45,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  *   }
  * )
  *
- * @todo: Check if we can use context.url.type = "uri".
  * @todo: Check if we can use context.force.restriction = "input".
- * @todo: Check if we can use context.force.optional = TRUE.
  * @todo: Check if we can use context.force.defaultValue = TRUE.
  * @todo: Check if we can use context.destination.restriction = "input".
- * @todo: Check if we can use context.destination.optional = TRUE.
  * @todo: Check if we can use context.destination.defaultValue = TRUE.
  *
  */
