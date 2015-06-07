@@ -14,6 +14,8 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Provides "Page redirect" rules action.
@@ -36,11 +38,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  *       label = @Translation("Append destination parameter"),
  *       description = @Translation("Whether to append a destination parameter to the URL, so another redirect issued later on would lead back to the origin page."),
  *       required = FALSE,
- *     ),
- *   },
- *   provides = {
- *     "redirect" = @ContextDefinition("any",
- *       label = @Translation("Redirect")
  *     ),
  *   }
  * )
@@ -66,6 +63,11 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
   protected $redirectDestination;
 
   /**
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  public $eventDispatcher;
+
+  /**
    * Constructs a PageRedirect object.
    *
    * @param array $configuration
@@ -76,11 +78,14 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
    *   The plugin implementation definition.
    * @param \Psr\Log\LoggerInterface $logger
    *   The alias storage service..
+   * @param RedirectDestinationInterface $redirect_destination
+   * @param EventDispatcherInterface $dispatcher
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerInterface $logger, RedirectDestinationInterface $redirect_destination) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerInterface $logger, RedirectDestinationInterface $redirect_destination, EventDispatcherInterface $dispatcher) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->logger = $logger;
     $this->redirectDestination = $redirect_destination;
+    $this->eventDispatcher = $dispatcher;
   }
 
   /**
@@ -92,7 +97,8 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
       $plugin_id,
       $plugin_definition,
       $container->get('logger.factory'),
-      $container->get('redirect.destination')
+      $container->get('redirect.destination'),
+      $container->get('event_dispatcher')
     );
   }
 
@@ -117,7 +123,6 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
     $batch = batch_get();
     if (isset($batch['current_set'])) {
       $this->logger->log(LogLevel::WARNING, $this->t('Skipped page redirect during batch processing'));
-      $this->setProvidedValue('redirect', FALSE);
       return;
     }
 
@@ -134,7 +139,12 @@ class SystemPageRedirect extends RulesActionBase implements ContainerFactoryPlug
       $this->redirectDestination->set(NULL);
     }
 
-    $this->setProvidedValue('redirect', new RedirectResponse($url));
+    $response = new RedirectResponse($url);
+    $listener = function($event) use ($response) {
+      $event->setResponse($response);
+    };
+    // Add the listener to the event dispatcher.
+    $this->eventDispatcher->addListener(KernelEvents::RESPONSE, $listener);
   }
 
 }

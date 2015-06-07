@@ -7,6 +7,7 @@
 
 namespace Drupal\Tests\rules\Integration\Action {
   use Drupal\Tests\rules\Integration\RulesIntegrationTestBase;
+  use Symfony\Component\EventDispatcher\EventDispatcher;
 
   /**
    * @coversDefaultClass \Drupal\rules\Plugin\Action\SystemPageRedirect
@@ -29,6 +30,11 @@ namespace Drupal\Tests\rules\Integration\Action {
     protected $redirectDestination;
 
     /**
+     * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+     */
+    protected $eventDispatcher;
+
+    /**
      * The action to be tested.
      *
      * @var \Drupal\rules\Plugin\Action\SystemPageRedirect
@@ -43,9 +49,12 @@ namespace Drupal\Tests\rules\Integration\Action {
 
       $this->logger = $this->getMock('Psr\Log\LoggerInterface');
       $this->redirectDestination = $this->getMock('Drupal\Core\Routing\RedirectDestinationInterface');
+      //$this->eventDispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
+      $this->eventDispatcher = new EventDispatcher();
 
       $this->container->set('logger.factory', $this->logger);
       $this->container->set('redirect.destination', $this->redirectDestination);
+      $this->container->set('event_dispatcher', $this->eventDispatcher);
 
       $this->action = $this->actionManager->createInstance('rules_page_redirect');
     }
@@ -65,19 +74,18 @@ namespace Drupal\Tests\rules\Integration\Action {
      * @covers ::execute
      */
     public function testRedirectInternal() {
+      // @todo: How to test this???
       $this->action->setContextValue('url', 'user')
         ->setContextValue('force', false)
         ->setContextValue('destination', false);
 
       $this->action->execute();
 
-      /* @var \Symfony\Component\HttpFoundation\RedirectResponse $redirect */
-      $redirect = $this->action->getProvidedContext('redirect')
-        ->getContextValue();
+      $listeners = $this->action->eventDispatcher->getListeners();
 
-      $this->assertInstanceOf('Symfony\Component\HttpFoundation\RedirectResponse', $redirect);
-
-      $this->assertEquals($redirect->getTargetUrl(), 'user');
+      // This is a bad assertion due to fact that I do not know how to access the redirection object
+      // within event listener. Help?
+      $this->assertArrayHasKey(\Symfony\Component\HttpKernel\KernelEvents::RESPONSE, $listeners);
     }
 
     /**
@@ -93,11 +101,11 @@ namespace Drupal\Tests\rules\Integration\Action {
 
       $this->action->execute();
 
-      /* @var \Symfony\Component\HttpFoundation\RedirectResponse $redirect */
-      $redirect = $this->action->getProvidedContext('redirect')
-        ->getContextValue();
+      $listeners = $this->action->eventDispatcher->getListeners();
 
-      $this->assertEquals($redirect, false);
+      // This is a bad assertion due to fact that I do not know how to access the redirection object
+      // within event listener. Help?
+      $this->assertArrayNotHasKey(\Symfony\Component\HttpKernel\KernelEvents::RESPONSE, $listeners);
     }
   }
 }
