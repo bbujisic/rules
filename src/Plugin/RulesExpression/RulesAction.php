@@ -11,11 +11,10 @@ use Drupal\Component\Plugin\Exception\ContextException;
 use Drupal\Core\Action\ActionManager;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\rules\Context\ContextHandlerTrait;
-use Drupal\rules\Core\RulesActionBase;
-use Drupal\rules\Engine\ActionExpressionInterface;
-use Drupal\rules\Engine\RulesExpressionTrait;
-use Drupal\rules\Engine\RulesState;
 use Drupal\rules\Context\DataProcessorManager;
+use Drupal\rules\Engine\ActionExpressionInterface;
+use Drupal\rules\Engine\ExpressionBase;
+use Drupal\rules\Engine\RulesStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -29,9 +28,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   label = @Translation("An executable action.")
  * )
  */
-class RulesAction extends RulesActionBase implements ContainerFactoryPluginInterface, ActionExpressionInterface {
+class RulesAction extends ExpressionBase implements ContainerFactoryPluginInterface, ActionExpressionInterface {
 
-  use RulesExpressionTrait;
   use ContextHandlerTrait;
 
   /**
@@ -90,7 +88,7 @@ class RulesAction extends RulesActionBase implements ContainerFactoryPluginInter
   /**
    * {@inheritdoc}
    */
-  public function executeWithState(RulesState $state) {
+  public function executeWithState(RulesStateInterface $state) {
     $action = $this->actionManager->createInstance($this->configuration['action_id']);
 
     // We have to forward the context values from our configuration to the
@@ -101,7 +99,7 @@ class RulesAction extends RulesActionBase implements ContainerFactoryPluginInter
 
     // Send the context value through configured data processor before executing
     // the action.
-    $this->processData($action);
+    $this->processData($action, $state);
 
     $action->execute();
 
